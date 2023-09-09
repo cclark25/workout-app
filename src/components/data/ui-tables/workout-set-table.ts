@@ -1,0 +1,127 @@
+import { IconLabel, UIColumn, UITable } from './ui-table';
+import { WorkoutSet } from '../workout-set';
+import { DateTime } from 'luxon';
+import { Workout } from '../workout';
+import { AppData } from '../data-manager';
+import { roundTo } from 'src/lib/helper-functions';
+
+export class WorkoutSetTable extends UITable<WorkoutSet> {
+  public baseColumns: UIColumn<WorkoutSet>[] = [
+    UIColumn.fromKey<WorkoutSet>(
+      {
+        name: 'recordTimestamp',
+        label: 'Date',
+        format: (v: DateTime) => {
+          const time = v.toLocaleString(DateTime.TIME_WITH_SECONDS);
+          const date = v.toISODate();
+          if (v.hasSame(DateTime.now(), 'day')) {
+            return time;
+          }
+          return date;
+        },
+        sort(a: DateTime, b: DateTime, rowA, rowB) {
+          return a.toMillis() - b.toMillis();
+        },
+        sortOrder: 'ad',
+      },
+      'recordTimestamp',
+      true,
+      'number'
+    ),
+    UIColumn.fromKey<WorkoutSet>(
+      {
+        name: 'repCount',
+        label: 'Reps',
+        sort(a: number, b: number) {
+          return a - b;
+        },
+      },
+      'repCount',
+      false,
+      'number'
+    ),
+    UIColumn.fromKey<WorkoutSet>(
+      {
+        name: 'liftWeight',
+        label: new IconLabel('scale'),
+        sortable: true,
+        format: (v: number, r?: WorkoutSet) => `${v} ${r?.weightUnits}`,
+        sort(a: number, b: number) {
+          return a - b;
+        },
+      },
+      'liftWeight',
+      false,
+      'number'
+    ),
+
+    UIColumn.fromGetSet<WorkoutSet>(
+      {
+        name: 'energyExpended',
+        label: new IconLabel('electric_bolt'),
+        format(
+          v: ReturnType<WorkoutSet['getEnergyEstimate']>,
+          row: WorkoutSet
+        ) {
+          return `${roundTo(v.value, 0)} ${v.unit}`;
+        },
+        sort(a: number, b: number) {
+          return a - b;
+        },
+      },
+      (row) => row.getEnergyEstimate(),
+      undefined,
+      'number'
+    ),
+  ];
+
+  public get columns() {
+    return [...this.baseColumns];
+  }
+
+  public getData() {
+    return this.workout.sets;
+  }
+
+  public constructor(public workout: Workout) {
+    super([], []);
+    console.log('workoutSet Constructed');
+  }
+
+  public onRecordDialogHide(): void {
+    throw new Error('Method not implemented.');
+  }
+  public deleteRecord(row: WorkoutSet): void {
+    this.workout.sets = this.workout.sets.filter((d) => d.uuid !== row.uuid);
+    console.log('deleted');
+    AppData.singleton.save();
+  }
+  public buildNew(): WorkoutSet {
+    const lastWorkout = [...(this.workout.parentRoutine?.workouts ?? [])]
+      .sort(
+        (a, b) =>
+          (a.getLatestTimestamp()?.toMillis() ?? 0) -
+          (b.getLatestTimestamp()?.toMillis() ?? 0)
+      )
+      .pop();
+
+    const lastSet =
+      [...this.workout.sets]
+        .sort(
+          (a, b) => a.recordTimestamp.toMillis() - b.recordTimestamp.toMillis()
+        )
+        .pop() ??
+      [...(lastWorkout?.sets ?? [])]
+        .sort(
+          (a, b) => a.recordTimestamp.toMillis() - b.recordTimestamp.toMillis()
+        )
+        .pop();
+
+    return new WorkoutSet(
+      lastSet?.repCount ?? 0,
+      lastSet?.liftWeight ?? 0,
+      DateTime.now(),
+      lastSet?.weightUnits
+    );
+  }
+}

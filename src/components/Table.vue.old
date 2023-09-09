@@ -1,0 +1,76 @@
+<template>
+  <table :class="table.cssClass">
+    <tr>
+      <th v-for="header in table.getHeaders()" v-bind:key="header">
+        {{ header }}
+      </th>
+    </tr>
+    <tr v-for="(record, index) in table.data" :key="refresh.toString()">
+      <td v-for="column in table.columns" v-bind:key="column.displayText">
+        <input
+          v-if="
+            table.isRecordInEditMode(record) && !table.isColumnReadonly(column)
+          "
+          :type="column.inputType ?? 'text'"
+          v-model="table.getColumnModel(record, column).value"
+        />
+        <span v-else>{{ table.getColumnEntry(record, column) }}</span>
+      </td>
+      <td v-if="table.isEditable()">
+        <q-btn
+          flat
+          :icon="table.isRecordInEditMode(record) ? 'done' : 'edit'"
+          @click="table.toggleRecordInEditMode(record) || refresh++"
+        />
+      </td>
+    </tr>
+  </table>
+  <q-table
+    flat
+    bordered
+    title=""
+    dense
+    :rows="table.data"
+    :columns="[
+      ...(table.qColumns ?? []),
+      { name: 'editButton', label: '', required: false, field: '' },
+    ]"
+    row-key="name"
+  >
+    <template v-slot:body="props">
+      <q-tr :props="props">
+        <q-td
+          v-for="qCol in props.cols"
+          :key="qCol.name"
+          :refresh="refresh"
+          :props="props"
+          width="100%"
+        >
+          <q-input
+            v-if="
+              qCol._sourceColumn &&
+              table.isRecordInEditMode(props.row) &&
+              !table.isColumnReadonly(qCol._sourceColumn)
+            "
+            v-model="
+                table.getColumnModel(props.row, qCol._sourceColumn).value as any
+              "
+            :type="qCol._sourceColumn?.inputType ?? 'text'"
+            width="100%"
+          ></q-input>
+          <q-btn
+            v-else-if="qCol.name === 'editButton' && table.isEditable()"
+            flat
+            :icon="table.isRecordInEditMode(props.row) ? 'done' : 'edit'"
+            @click="table.toggleRecordInEditMode(props.row) || refresh++"
+          />
+          <span v-else>{{
+            qCol._sourceColumn
+              ? table.getColumnEntry(props.row, qCol._sourceColumn)
+              : ''
+          }}</span>
+        </q-td>
+      </q-tr>
+    </template>
+  </q-table>
+</template>
