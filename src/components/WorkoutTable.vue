@@ -50,6 +50,13 @@
           </div>
         </template>
       </div-table>
+
+      <canvas
+        ref="setGraph1"
+        v-else-if="props.dialogTabSelected === 'setGraphs'"
+      ></canvas>
+
+      {{ setupCharts() }}
     </template>
 
     <template v-slot:footer-left>
@@ -76,6 +83,9 @@ import { WorkoutTable } from './data/ui-tables/workout-table';
 import { DateTime } from 'luxon';
 import { Workout } from './data/workout';
 import { TargetRepsTable } from './data/ui-tables/target-reps-table';
+// import { Chart } from 'chart.js';
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-luxon';
 
 export default defineComponent({
   name: 'WorkoutsTable',
@@ -100,6 +110,7 @@ export default defineComponent({
       workoutInProgress: 0,
       table: new WorkoutTable(this.routine ?? new Routine('unnamed routine')),
       currentWorkoutSetTable: undefined as WorkoutSetTable | undefined,
+      chart1: undefined as Chart<any, any, any> | undefined,
     };
   },
   methods: {
@@ -116,6 +127,71 @@ export default defineComponent({
     timerTicker: async function () {
       this.timerTicks++;
       setTimeout(this.timerTicker, 1000);
+    },
+
+    setupCharts() {
+      this.$nextTick(() => {
+        const graphRef = this.$refs['setGraph1'];
+        console.log('Setting up graphs: ', graphRef);
+        if (graphRef as any) {
+          const config: any = {
+            type: 'line',
+
+            data: {
+              datasets: [
+                {
+                  label: 'Calories',
+
+                  data:
+                    this.currentWorkoutSetTable?.getData().map((d) => ({
+                      y: d.getEnergyEstimate().value,
+                      x: d.recordTimestamp,
+                    })) ?? [],
+                  backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)',
+                  ],
+                  borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                  ],
+                  borderWidth: 1,
+                },
+              ],
+            },
+            options: {
+              scales: {
+                x: {
+                  type: 'time',
+                  time: {
+                    // Luxon format string
+                    tooltipFormat: 'DD T',
+                  },
+                  title: {
+                    display: true,
+                    text: 'Date',
+                  },
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: 'Calories',
+                  },
+                },
+              },
+            },
+          };
+          this.chart1 = new (Chart as any)(graphRef as any, config);
+        }
+      });
     },
   },
   setup() {

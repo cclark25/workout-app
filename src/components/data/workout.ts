@@ -1,4 +1,8 @@
-import { average, getWeightForRepGoal } from 'src/lib/helper-functions';
+import {
+  average,
+  calculateOneRepMax,
+  getWeightForRepGoal,
+} from 'src/lib/helper-functions';
 import {
   WorkoutSetSerial,
   WorkoutSet,
@@ -6,6 +10,7 @@ import {
 } from './workout-set';
 import { Serializer } from '../models';
 import { Routine } from './routine';
+import { DateTime } from 'luxon';
 declare const crypto: any;
 
 export interface WorkoutSerial {
@@ -33,6 +38,13 @@ export class Workout {
     };
   }
 
+  public get totalCalories() {
+    return {
+      value: this.sets.reduce((p, c) => p + c.getEnergyEstimate().value, 0),
+      unit: 'lbs' as const,
+    };
+  }
+
   public getLatestTimestamp() {
     return (
       this.sets
@@ -54,6 +66,15 @@ export class Workout {
 
     console.log('Getting target: ', target);
     return target;
+  }
+  public calculateOneRepMax() {
+    return average(
+      this.sets.map((s) =>
+        calculateOneRepMax(
+          new WorkoutSet(s.repCount, s.liftWeight, DateTime.now())
+        )
+      )
+    );
   }
 }
 

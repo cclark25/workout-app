@@ -13,16 +13,45 @@
   </q-drawer>
 
   <div class="main-page">
+    {{ console.log({ tabSelected }) }}
     <div class="navigation-bar">
-      <q-btn flat icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-      {{ RoutineNavigator.getSelectedRoutine()?.getDisplayName() }}
+      <div class="navigation-actions">
+        <q-btn flat icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        {{ RoutineNavigator.getSelectedRoutine()?.getDisplayName() }}
+      </div>
+
+      <q-tabs
+        class="navigation-tabs"
+        align="left"
+        v-model="tabSelected"
+        active-bg-color="grey-4"
+      >
+        <q-tab key="data" label="Data" name="data" />
+        <q-tab key="graphs" label="Graphs" name="graphs" />
+      </q-tabs>
+
+      <q-btn
+        flat
+        icon="upload_file"
+        aria-label="Upload File"
+        @click="openFileDialog"
+      />
+
+      <input
+        ref="fileInput"
+        style="display: none"
+        type="file"
+        accept=".json"
+        @change="loadFile"
+      />
     </div>
-    <div class="main-body">
+    <div v-if="tabSelected === 'data'" class="main-body">
       <workouts-table
         :routine="RoutineNavigator.getSelectedRoutine()"
         :key="RoutineNavigator.selectedRoutine?.uuid"
       ></workouts-table>
     </div>
+    <main-graphs v-else-if="(tabSelected = 'graphs')"></main-graphs>
   </div>
 </template>
 
@@ -30,13 +59,14 @@
 import WorkoutsTable from 'components/WorkoutTable.vue';
 import { defineComponent, ref } from 'vue';
 import { RoutineNavigator } from 'src/lib/navigator';
-
 import { WorkoutSetTable } from '../components/data/ui-tables/workout-set-table';
-import { Routine } from 'src/components/data/routine';
+import { Routine, RoutineSerial } from 'src/components/data/routine';
 import { RoutineTable } from '../components/data/ui-tables/routine-table';
 import { AppData } from 'src/components/data/data-manager';
 // import TableManager from 'components/Table.vue';
 import DivTable from 'components/DivTable.vue';
+import MainGraphs from 'components/MainGraphs.vue';
+import { RoutineSerializer } from 'components/data/routine';
 
 export default defineComponent({
   name: 'IndexPage',
@@ -44,6 +74,7 @@ export default defineComponent({
     WorkoutsTable,
     // TableManager,
     DivTable,
+    MainGraphs,
   },
 
   data() {
@@ -57,6 +88,7 @@ export default defineComponent({
           AppData.singleton.routines = routines;
         },
       }),
+      tabSelected: 'data' as 'data' | 'graphs',
     };
   },
   methods: {
@@ -70,6 +102,15 @@ export default defineComponent({
     toggleLeftDrawer() {
       this.leftDrawerOpen = !this.leftDrawerOpen;
     },
+    async loadFile(input: any) {
+      const routines: Routine[] = (
+        JSON.parse(await input.target.files[0].text()) as RoutineSerial[]
+      ).map((r) => new RoutineSerializer().deserialize(r));
+      AppData.singleton.routines.push(...routines);
+    },
+    openFileDialog() {
+      (this.$refs.fileInput as any).click();
+    },
   },
 
   setup() {
@@ -77,6 +118,7 @@ export default defineComponent({
     return {
       WorkoutSetTable,
       RoutineNavigator,
+
       leftDrawerOpen,
     };
   },

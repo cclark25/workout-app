@@ -4,7 +4,6 @@ declare const crypto: any;
 
 export class Routine {
   public workouts: Workout[] = [];
-  public inProgressWorkout?: Workout;
   public constructor(
     public name: string,
     public readonly uuid: string = crypto.randomUUID(),
@@ -20,20 +19,6 @@ export class Routine {
     return this.name;
   }
 
-  public endCurrentRoutine() {
-    if (this.inProgressWorkout) {
-      this.workouts.push(this.inProgressWorkout);
-      this.inProgressWorkout = undefined;
-    }
-  }
-
-  public startNewRoutine() {
-    if (this.inProgressWorkout) {
-      this.endCurrentRoutine();
-    }
-    this.inProgressWorkout = new Workout([], this.configuration.weightUnits);
-  }
-
   public getLatestTimestamp() {
     return (
       this.workouts
@@ -45,10 +30,9 @@ export class Routine {
 }
 
 export interface RoutineSerial {
-  uuid: string;
+  uuid?: string;
   workouts: WorkoutSerial[];
   name: string;
-  inProgressWorkout?: WorkoutSerial;
 }
 
 export class RoutineSerializer implements Serializer<Routine, RoutineSerial> {
@@ -56,21 +40,15 @@ export class RoutineSerializer implements Serializer<Routine, RoutineSerial> {
     const serializer = new WorkoutSerializer();
     return {
       ...source,
-      inProgressWorkout: source.inProgressWorkout
-        ? serializer.serialize(source.inProgressWorkout)
-        : undefined,
       workouts: source.workouts.map((w) => serializer.serialize(w)),
     };
   }
   deserialize(source: RoutineSerial): Routine {
     const serializer = new WorkoutSerializer();
-    const newRoutine = new Routine(source.name, source.uuid);
+    const newRoutine = new Routine(source.name);
     newRoutine.workouts.push(
       ...source.workouts.map((w) => serializer.deserialize(w))
     );
-    newRoutine.inProgressWorkout = source.inProgressWorkout
-      ? serializer.deserialize(source.inProgressWorkout)
-      : undefined;
 
     return newRoutine;
   }
