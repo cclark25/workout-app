@@ -2,6 +2,7 @@
   <div-table
     v-if="routine"
     selectable
+    expandable
     :tableManager="table"
     :key="routine.uuid"
     ref="workoutTable"
@@ -31,14 +32,9 @@
       </div-table>
 
       <div-table
-        class="dialog-target-reps"
         readonly
-        title="Lift weights equivalent to this 1 Rep
-        Max"
         v-else-if="props.dialogTabSelected === 'repMaxes'"
-        hide-bottom
         :table-manager="new TargetRepsTable((props.row as Workout))"
-        32
       >
         <template v-slot:footer-left>
           <div class="elapsed-time" :key="timerTicks">
@@ -83,7 +79,6 @@ import { WorkoutTable } from './data/ui-tables/workout-table';
 import { DateTime } from 'luxon';
 import { Workout } from './data/workout';
 import { TargetRepsTable } from './data/ui-tables/target-reps-table';
-// import { Chart } from 'chart.js';
 import Chart from 'chart.js/auto';
 import 'chartjs-adapter-luxon';
 
@@ -208,6 +203,7 @@ export default defineComponent({
     const tableManager = this.$refs.workoutTable as any;
     tableManager?.onDialogClose(() => {
       this.currentWorkoutSetTable?.clearEditModes();
+      tableManager?.deselectRow();
     });
   },
 });

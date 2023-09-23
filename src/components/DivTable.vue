@@ -1,5 +1,5 @@
 <template>
-  <q-dialog maximized v-if="selectable" :model-value="rowSelectedChange">
+  <q-dialog maximized v-if="expandable" :model-value="rowSelectedChange">
     <div class="dialog">
       <div class="dialog-header">
         <q-tabs
@@ -20,10 +20,7 @@
           class="dialog-close-div"
           flat
           icon="close"
-          @click="
-            dialogHidden();
-            rowSelectedChange = false;
-          "
+          @click="dialogHidden()"
         ></q-btn>
       </div>
 
@@ -64,70 +61,67 @@
 
       {{ ((displayedRowNumber = 1), undefined) }}
 
-      <q-slide-item
+      <div
         v-for="row in getSortedTableData()"
-        :class="`div-table-body ${
-          displayedRowNumber++ % 2 ? 'odd' : 'even'
-        }-row`"
+        :class="'div-table-body'"
         :key="row[tableManager.tableKey]"
-        style="display: table-row-group"
-        :ref="`slide-row-${row[tableManager.tableKey]}`"
+        style="display: contents"
       >
         <div
-          v-for="column in tableManager.columns"
-          :key="column.name"
-          style="display: table-cell"
-          class="div-table-body-cell"
-          @click="selectRow(row)"
+          :ref="`row-${row[tableManager.tableKey]}`"
+          style="display: table-row"
+          :class="`${displayedRowNumber++ % 2 ? 'odd' : 'even'}-row`"
+          @mousedown="
+            mouseTouchStart(
+              500,
+              row,
+              () => editRow(row),
+              () => selectRow(row)
+            )
+          "
+          @mouseup="mouseTouchEnd(row)"
+          @touchstart="
+            mouseTouchStart(
+              500,
+              row,
+              () => editRow(row),
+              () => {}
+            )
+          "
+          @touchend="mouseTouchEnd(row)"
         >
-          <q-input
-            v-if="tableManager.isRecordInEditMode(row) && !column.isReadOnly"
-            v-model="column.getModel(row).value"
-            :type="column.inputType ?? 'text'"
-          />
-          <template v-else>
-            {{
-              column.format
-                ? column.format(
-                    typeof column.field === 'function'
-                      ? column.field(row)
-                      : row[column.field],
-                    row
-                  )
-                : typeof column.field === 'function'
-                ? column.field(row)
-                : row[column.field]
-            }}
-          </template>
-        </div>
-
-        <template v-slot:left v-if="!readonly">
-          <q-btn
-            v-if="!readonly"
-            class="row-delete-button"
-            flat
-            icon="delete"
-            @click="
-              tableManager.toggleRecordInEditMode(row);
-              tableManager.deleteRecord(row);
+          <div
+            v-for="column in tableManager.columns"
+            :key="column.name"
+            style="display: table-cell"
+            :class="
+              'div-table-body-cell' +
+              (row === selectedRow ? ' selected-row' : '')
             "
-          />
-          <q-btn
-            class="row-delete-button"
-            flat
-            icon="cancel"
-            @click="resetRowSlider(row)"
-          />
-        </template>
-        <template v-slot:right v-if="tableManager.isEditable() && !readonly">
-          <q-btn
-            class="row-edit-button"
-            flat
-            :icon="tableManager.isRecordInEditMode(row) ? 'done' : 'edit'"
-            @click="editRow(row)"
-          />
-        </template>
-      </q-slide-item>
+          >
+            <q-input
+              v-if="tableManager.isRecordInEditMode(row) && !column.isReadOnly"
+              v-model="column.getModel(row).value"
+              :type="column.inputType ?? 'text'"
+            />
+
+            <template v-else>
+              {{
+                column.format
+                  ? column.format(
+                      typeof column.field === 'function'
+                        ? column.field(row)
+                        : row[column.field],
+                      row
+                    )
+                  : typeof column.field === 'function'
+                  ? column.field(row)
+                  : row[column.field]
+              }}
+            </template>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -147,9 +141,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue';
+import { defineComponent, PropType, ref } from 'vue';
 import { UITable, IconLabel, UIColumn } from './data/ui-tables/ui-table';
 import { AppData } from './data/data-manager';
+import { DateTime } from 'luxon';
 
 export default defineComponent({
   name: 'DivTable',
@@ -159,6 +154,9 @@ export default defineComponent({
       required: true,
     },
     selectable: {
+      type: Boolean,
+    },
+    expandable: {
       type: Boolean,
     },
     rowSelected: {
@@ -181,6 +179,7 @@ export default defineComponent({
       dialogCloseCallbacks: [] as (() => void)[],
       selectedRow: undefined as any,
       dialogTabSelected: this.dialogTabs[0]?.key,
+      mouseTouchStateSymbol: Symbol('MouseTouchStateSymbol'),
     };
 
     return data;
@@ -190,11 +189,45 @@ export default defineComponent({
   },
 
   methods: {
+    mouseTouchStart(
+      timeout: number,
+      row: any,
+      onHold: () => void,
+      onClick: () => void
+    ) {
+      if (row[this.mouseTouchStateSymbol]) {
+        return;
+      }
+
+      row[this.mouseTouchStateSymbol] = { onClick };
+
+      const state = row[this.mouseTouchStateSymbol];
+
+      state['timestamp'] = DateTime.now();
+
+      setTimeout(() => {
+        state['timedOut'] = true;
+        if (row[this.mouseTouchStateSymbol] === state) {
+          onHold();
+        }
+      }, timeout);
+    },
+
+    mouseTouchEnd(row: any) {
+      const timeoutObj = row[this.mouseTouchStateSymbol];
+      const timedOut = !!timeoutObj?.['timedOut'];
+      if (!timedOut) {
+        timeoutObj['onClick']?.();
+      }
+      row[this.mouseTouchStateSymbol] = undefined;
+    },
+
     scrollToTarget() {
       if (this.targetIndex !== undefined) {
-        const refEl = (this.$refs[`slide-row-${this.targetIndex}`] as any)?.[0];
+        const refEl = (this.$refs[`row-${this.targetIndex}`] as any)?.[0];
+        console.log('refEl: ', refEl);
 
-        refEl?.$el.scrollIntoView({
+        refEl?.scrollIntoView({
           block: 'end',
           behavior: 'smooth',
         });
@@ -210,27 +243,21 @@ export default defineComponent({
         }
       }
     },
-    resetRowSlider(row: any) {
-      const slideRow = (
-        this.$refs[`slide-row-${row[this.tableManager.tableKey]}`] as {
-          reset: () => void;
-        }[]
-      )?.[0];
-
-      slideRow?.reset();
-    },
     editRow(row: any) {
       this.tableManager.toggleRecordInEditMode(row);
       this.targetIndex = row[this.tableManager.tableKey];
-      this.resetRowSlider(row);
+
+      this.$forceUpdate();
     },
     dialogHidden() {
       for (const callback of this.dialogCloseCallbacks) {
         callback();
       }
       this.rowSelectedChange = false;
-      this.tableManager.onRecordDialogHide(this.selectedRow);
-      this.editRow(this.selectedRow);
+      if (this.selectedRow) {
+        this.tableManager.onRecordDialogHide(this.selectedRow);
+        this.deselectRow();
+      }
       AppData.singleton.save();
     },
 
@@ -240,11 +267,18 @@ export default defineComponent({
 
     selectRow(row: any) {
       this.selectedRow = row;
-      if (this.selectable) {
+      if (this.expandable) {
         this.rowSelectedChange = true;
       }
       this.tableManager.rowSelected(row);
       this.rowSelected();
+      if (!this.selectable) {
+        this.deselectRow();
+      }
+    },
+
+    deselectRow() {
+      this.selectedRow = undefined;
     },
 
     clearEdits() {
@@ -256,7 +290,6 @@ export default defineComponent({
 
       this.selectRow(newRecord);
       this.editRow(newRecord);
-      this.$forceUpdate();
     },
 
     getSortedTableData() {
@@ -294,7 +327,6 @@ export default defineComponent({
         column.sortOrder = 'ad';
       }
 
-      console.log('toggled: ', column.sortOrder);
       this.$forceUpdate();
     },
   },

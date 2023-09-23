@@ -32,10 +32,11 @@ export class Workout {
   }
 
   public get averageWeight() {
-    return {
+    const avg = {
       value: average(this.sets.map((s) => s.liftWeight)),
       units: this.weightUnits,
     };
+    return avg;
   }
 
   public get totalCalories() {

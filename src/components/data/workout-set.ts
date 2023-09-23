@@ -17,7 +17,14 @@ export class WorkoutSet {
     public recordTimestamp: DateTime,
     public weightUnits: 'lbs' = 'lbs',
     public readonly uuid: string = crypto.randomUUID()
-  ) {}
+  ) {
+    if (isNaN(repCount)) {
+      throw Error('repCount is not a number!');
+    }
+    if (isNaN(liftWeight)) {
+      throw Error('liftWeight is not a number!');
+    }
+  }
 
   public getEnergyEstimate() {
     const meters = 0.3;
@@ -45,12 +52,14 @@ export class WorkoutSetSerializer
   }
 
   public deserialize(source: WorkoutSetSerial): WorkoutSet {
-    return new WorkoutSet(
-      source.repCount,
-      source.liftWeight,
+    const set = new WorkoutSet(
+      Number(source.repCount),
+      Number(source.liftWeight),
       DateTime.fromMillis(source.recordTimestamp),
       source.weightUnits,
       source.uuid
     );
+
+    return set;
   }
 }

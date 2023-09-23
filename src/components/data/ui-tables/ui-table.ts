@@ -98,12 +98,21 @@ export class UIColumn<T> implements QColumn {
   private _getModel = function (this: UIColumn<T>, r: T) {
     const getter = this.get.bind(this);
     const setter = this.set?.bind(this);
+    const inputType = this.inputType;
     return {
       get value() {
         return getter(r);
       },
       set value(v: any) {
-        setter?.(r, v);
+        let formatted;
+        if (inputType === 'number') {
+          formatted = Number(v);
+        } else if (inputType === 'text') {
+          formatted = String(v);
+        } else {
+          formatted = v;
+        }
+        setter?.(r, formatted);
       },
     };
   }.bind(this);
@@ -236,7 +245,7 @@ export abstract class UITable<
   public abstract buildNew(): T;
 
   public rowSelected(row: T) {
-    console.log('Not overridden');
+    return;
   }
 
   public clearEditModes() {

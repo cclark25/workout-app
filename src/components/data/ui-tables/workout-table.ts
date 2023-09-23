@@ -52,7 +52,7 @@ export class WorkoutTable extends UITable<Workout> {
       {
         name: 'averageWeight',
         label: new IconLabel('scale'), //'Average Weight',
-        format: (v) => {
+        format: (v, row) => {
           return `${roundTo(v.value, 2)} ${v.units}`;
         },
         sort(a: { value: number }, b: { value: number }, rowA, rowB) {

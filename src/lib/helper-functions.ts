@@ -23,5 +23,10 @@ export function average(values: number[]) {
   if (values.length === 0) {
     return 0;
   }
-  return values.reduce((p, c) => p + c, 0) / values.length;
+  const sum = values.reduce((p, c) => p + c, 0);
+  const count = values.length;
+  const avg = sum / count;
+  console.log('values: ', { sum, count, avg, values });
+
+  return avg;
 }

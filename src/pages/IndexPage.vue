@@ -1,6 +1,4 @@
 <template>
-  {{ onInit() }}
-
   <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
     <div-table
       :tableManager="routineTable"
@@ -9,6 +7,8 @@
           leftDrawerOpen = false;
         }
       "
+      selectable
+      ref="routine-table"
     ></div-table>
   </q-drawer>
 
@@ -63,7 +63,6 @@ import { WorkoutSetTable } from '../components/data/ui-tables/workout-set-table'
 import { Routine, RoutineSerial } from 'src/components/data/routine';
 import { RoutineTable } from '../components/data/ui-tables/routine-table';
 import { AppData } from 'src/components/data/data-manager';
-// import TableManager from 'components/Table.vue';
 import DivTable from 'components/DivTable.vue';
 import MainGraphs from 'components/MainGraphs.vue';
 import { RoutineSerializer } from 'components/data/routine';
@@ -72,7 +71,6 @@ export default defineComponent({
   name: 'IndexPage',
   components: {
     WorkoutsTable,
-    // TableManager,
     DivTable,
     MainGraphs,
   },
@@ -92,13 +90,6 @@ export default defineComponent({
     };
   },
   methods: {
-    onInit() {
-      RoutineNavigator.onSelectedChange((r) => {
-        this.routineChanged++;
-        this.$forceUpdate();
-        console.log('Routine changed');
-      });
-    },
     toggleLeftDrawer() {
       this.leftDrawerOpen = !this.leftDrawerOpen;
     },
@@ -111,6 +102,16 @@ export default defineComponent({
     openFileDialog() {
       (this.$refs.fileInput as any).click();
     },
+  },
+
+  mounted() {
+    RoutineNavigator.onSelectedChange((r) => {
+      this.routineChanged++;
+      this.$forceUpdate();
+      console.log('Routine changed');
+    });
+    const routineTableRef = this.$refs['routine-table'] as any;
+    routineTableRef?.selectRow?.(RoutineNavigator.getSelectedRoutine());
   },
 
   setup() {
