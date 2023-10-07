@@ -173,7 +173,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from 'vue';
+import { defineComponent, PropType } from 'vue';
 import { UITable, IconLabel, UIColumn } from './data/ui-tables/ui-table';
 import { AppData } from './data/data-manager';
 import { DateTime } from 'luxon';
@@ -181,7 +181,7 @@ import { DateTime } from 'luxon';
 export default defineComponent({
   name: 'DivTable',
   props: {
-    tableManager: {
+    tableManagerProp: {
       type: UITable as PropType<UITable<any>>,
       required: true,
     },
@@ -214,6 +214,7 @@ export default defineComponent({
       dialogTabSelected: this.dialogTabs[0]?.key,
       mouseTouchStateSymbol: Symbol('MouseTouchStateSymbol'),
       deleteConfirmation: false,
+      tableManager: this.tableManagerProp,
     };
 
     return data;
@@ -234,40 +235,42 @@ export default defineComponent({
     },
     mouseTouchStart(
       timeout: number,
-      row: any,
+      row: unknown,
       onHold: () => void,
       onClick: () => void
     ) {
-      if (row[this.mouseTouchStateSymbol]) {
+      if ((row as any)[this.mouseTouchStateSymbol]) {
         return;
       }
 
-      row[this.mouseTouchStateSymbol] = { onClick };
+      (row as any)[this.mouseTouchStateSymbol] = { onClick };
 
-      const state = row[this.mouseTouchStateSymbol];
+      const state = (row as any)[this.mouseTouchStateSymbol];
 
       state['timestamp'] = DateTime.now();
 
       setTimeout(() => {
         state['timedOut'] = true;
-        if (row[this.mouseTouchStateSymbol] === state) {
+        if ((row as any)[this.mouseTouchStateSymbol] === state) {
           onHold();
         }
       }, timeout);
     },
 
-    mouseTouchEnd(row: any) {
-      const timeoutObj = row[this.mouseTouchStateSymbol];
+    mouseTouchEnd(row: unknown) {
+      const timeoutObj = (row as any)[this.mouseTouchStateSymbol];
       const timedOut = !!timeoutObj?.['timedOut'];
       if (!timedOut) {
         timeoutObj['onClick']?.();
       }
-      row[this.mouseTouchStateSymbol] = undefined;
+      (row as any)[this.mouseTouchStateSymbol] = undefined;
     },
 
     scrollToTarget() {
       if (this.targetIndex !== undefined) {
-        const refEl = (this.$refs[`row-${this.targetIndex}`] as any)?.[0];
+        const refEl = (
+          this.$refs[`row-${this.targetIndex}`] as HTMLElement[]
+        )?.[0];
 
         refEl?.scrollIntoView({
           block: 'end',
@@ -277,17 +280,16 @@ export default defineComponent({
         if (
           !this.$refs[this.targetIndex] ||
           !this.tableManager.isRecordInEditMode(
-            (this.$refs[this.targetIndex] as any)?.props.row
+            (this.$refs[this.targetIndex] as { props: { row: any } })?.props.row
           )
-          // ||          !this.tableManager.isEditable()
         ) {
           this.targetIndex = undefined;
         }
       }
     },
-    editRow(row: any) {
+    editRow(row: unknown) {
       this.tableManager.toggleRecordInEditMode(row);
-      this.targetIndex = row[this.tableManager.tableKey];
+      this.targetIndex = (row as any)[this.tableManager.tableKey];
       this.editModeRow = row;
 
       this.$forceUpdate();
@@ -314,7 +316,7 @@ export default defineComponent({
       this.dialogCloseCallbacks.push(callback);
     },
 
-    selectRow(row: any) {
+    selectRow(row: unknown) {
       this.selectedRow = row;
       if (this.expandable) {
         this.showDialog = true;
@@ -362,7 +364,7 @@ export default defineComponent({
           ) ?? 0) * direction
       );
     },
-    toggleSort(column: UIColumn<any>) {
+    toggleSort<T>(column: UIColumn<T>) {
       if (!column.sort) {
         return;
       }
@@ -371,7 +373,7 @@ export default defineComponent({
 
       if (column !== this.tableManager.sortColumn) {
         column.sortOrder = 'ad';
-        (this.tableManager.sortColumn as any) = column;
+        this.tableManager.sortColumn = column;
       } else if (sortOrder === 'ad') {
         column.sortOrder = 'da';
       } else if (sortOrder === 'da') {

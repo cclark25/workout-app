@@ -19,7 +19,7 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
           }
           return date;
         },
-        sort(a: DateTime, b: DateTime, rowA, rowB) {
+        sort(a: DateTime, b: DateTime) {
           return a.toMillis() - b.toMillis();
         },
         sortOrder: 'ad',
@@ -59,10 +59,7 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
       {
         name: 'energyExpended',
         label: 'Cal', //new IconLabel('electric_bolt'),
-        format(
-          v: ReturnType<WorkoutSet['getEnergyEstimate']>,
-          row: WorkoutSet
-        ) {
+        format(v: ReturnType<WorkoutSet['getEnergyEstimate']>) {
           return `${roundTo(v.value, 0)} ${v.unit}`;
         },
         sort(

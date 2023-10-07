@@ -1,4 +1,3 @@
-import { QTableProps } from 'quasar';
 import { AppData } from '../data-manager';
 
 export type QColumn = {

@@ -1,4 +1,3 @@
-import { Ref } from 'vue';
 import { WorkoutSerializer } from './data/workout';
 import { WorkoutSetSerializer } from './data/workout-set';
 

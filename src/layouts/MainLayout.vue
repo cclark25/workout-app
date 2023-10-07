@@ -29,7 +29,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent } from 'vue';
 import { AppData } from 'src/components/data/data-manager';
 import { RoutineNavigator } from 'src/lib/navigator';
 

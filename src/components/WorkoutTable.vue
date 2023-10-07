@@ -3,7 +3,7 @@
     v-if="routine"
     selectable
     expandable
-    :tableManager="table"
+    :tableManagerProp="table"
     :key="routine.uuid"
     ref="workoutTable"
     :dialog-tabs="[
@@ -127,7 +127,7 @@ export default defineComponent({
     setupCharts() {
       this.$nextTick(() => {
         const graphRef = this.$refs['setGraph1'];
-        if (graphRef as any) {
+        if (graphRef) {
           const config: any = {
             type: 'line',
 
@@ -183,7 +183,10 @@ export default defineComponent({
               },
             },
           };
-          this.chart1 = new (Chart as any)(graphRef as any, config);
+          const chartConstructor = Chart as unknown as {
+            new (graphRef: any, config: any): Chart;
+          };
+          this.chart1 = new chartConstructor(graphRef, config);
         }
       });
     },
@@ -199,7 +202,8 @@ export default defineComponent({
     };
   },
   mounted() {
-    const tableManager = this.$refs.workoutTable as any;
+    const tableManager = this.$refs.workoutTable as typeof DivTable;
+
     tableManager?.onDialogClose(() => {
       this.currentWorkoutSetTable?.clearEditModes();
       tableManager?.deselectRow();

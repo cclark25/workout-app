@@ -1,7 +1,7 @@
 <template>
   <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
     <div-table
-      :tableManager="routineTable"
+      :tableManagerProp="routineTable"
       :row-selected="
         () => {
           leftDrawerOpen = false;
@@ -104,7 +104,7 @@ export default defineComponent({
   },
 
   mounted() {
-    RoutineNavigator.onSelectedChange((r) => {
+    RoutineNavigator.onSelectedChange(() => {
       this.routineChanged++;
       this.$forceUpdate();
     });

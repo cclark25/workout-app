@@ -10,7 +10,7 @@ export class RoutineTable extends UITable<Routine> {
       {
         name: 'displayName',
         label: 'Routine',
-        sort(a: string, b: string, rowA, rowB) {
+        sort(a: string, b: string) {
           return a < b ? -1 : 1;
         },
         sortable: true,
@@ -23,7 +23,7 @@ export class RoutineTable extends UITable<Routine> {
       {
         name: 'lastTimestamp',
         label: 'Last Workout',
-        sort(a: DateTime | null, b: DateTime | null, rowA, rowB) {
+        sort(a: DateTime | null, b: DateTime | null) {
           return (a?.toMillis() ?? 0) - (b?.toMillis() ?? 0);
         },
         format: (v: DateTime | null) => {

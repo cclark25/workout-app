@@ -12,7 +12,7 @@ export class WorkoutTable extends UITable<Workout> {
         name: 'lastTimeStamp',
         label: 'Date',
         format: (v: DateTime | null) => v?.toISODate() ?? '',
-        sort(a: DateTime, b: DateTime, rowA, rowB) {
+        sort(a: DateTime, b: DateTime) {
           return (
             (a?.toMillis() ?? Number.MAX_SAFE_INTEGER) -
             (b?.toMillis() ?? Number.MAX_SAFE_INTEGER)
@@ -48,20 +48,20 @@ export class WorkoutTable extends UITable<Workout> {
       true,
       'number'
     ),
-    UIColumn.fromKey<Workout>(
+    UIColumn.fromGetSet<Workout>(
       {
-        name: 'averageWeight',
-        label: new IconLabel('scale'), //'Average Weight',
-        format: (v, row) => {
+        name: 'oneRepMax',
+        label: '1 Rep Max', //new IconLabel('scale'), //'Average Weight',
+        format: (v) => {
           return `${roundTo(v.value, 2)} ${v.units}`;
         },
-        sort(a: { value: number }, b: { value: number }, rowA, rowB) {
+        sort(a: { value: number }, b: { value: number }) {
           return a.value - b.value;
         },
         sortable: true,
       },
-      'averageWeight',
-      true,
+      (row) => row.getTargetRepWeight(1),
+      undefined,
       'number'
     ),
 
@@ -70,7 +70,7 @@ export class WorkoutTable extends UITable<Workout> {
         name: 'totalEnergyExpended',
         label: new IconLabel('electric_bolt'), //'Total Estimated Energy Expended',
         sortable: true,
-        format(v: number, row: Workout) {
+        format(v: number) {
           return `${roundTo(v, 0)} cal`;
         },
         sort(a: number, b: number) {
@@ -101,7 +101,7 @@ export class WorkoutTable extends UITable<Workout> {
     super(routine.workouts, []);
   }
 
-  public onRecordDialogHide(record: Workout) {
+  public onRecordDialogHide() {
     this.routine.workouts = this.routine.workouts.filter(
       (d) => d.sets.length > 0
     );

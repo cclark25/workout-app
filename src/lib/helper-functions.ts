@@ -1,5 +1,4 @@
 import { WorkoutSet } from 'src/components/data/workout-set';
-import { Ref } from 'vue';
 
 export function calculateOneRepMax(workoutSet: WorkoutSet) {
   return workoutSet.liftWeight * (1 + workoutSet.repCount / 30);
