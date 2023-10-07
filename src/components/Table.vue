@@ -182,7 +182,6 @@ export default defineComponent({
   methods: {
     scrollToTarget() {
       if (this.targetIndex !== undefined) {
-        console.log('Scroll to target: ', this.$refs[this.targetIndex] as any);
         (this.$refs[this.targetIndex] as any)?.$el.scrollIntoView({
           block: 'end',
           behavior: 'smooth',
@@ -238,7 +237,6 @@ export default defineComponent({
       event: Parameters<Exclude<TouchSwipeValue, undefined>>[0],
       row: any
     ) {
-      console.log(event);
       let swipeDirection = this.rowSwiped;
       switch (event.direction) {
         case 'left':

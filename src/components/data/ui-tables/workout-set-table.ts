@@ -58,15 +58,18 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
     UIColumn.fromGetSet<WorkoutSet>(
       {
         name: 'energyExpended',
-        label: new IconLabel('electric_bolt'),
+        label: 'Cal', //new IconLabel('electric_bolt'),
         format(
           v: ReturnType<WorkoutSet['getEnergyEstimate']>,
           row: WorkoutSet
         ) {
           return `${roundTo(v.value, 0)} ${v.unit}`;
         },
-        sort(a: number, b: number) {
-          return a - b;
+        sort(
+          a: ReturnType<WorkoutSet['getEnergyEstimate']>,
+          b: ReturnType<WorkoutSet['getEnergyEstimate']>
+        ) {
+          return a.value - b.value;
         },
       },
       (row) => row.getEnergyEstimate(),
@@ -85,7 +88,6 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
 
   public constructor(public workout: Workout) {
     super([], []);
-    console.log('workoutSet Constructed');
   }
 
   public onRecordDialogHide(): void {
@@ -93,7 +95,6 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
   }
   public deleteRecord(row: WorkoutSet): void {
     this.workout.sets = this.workout.sets.filter((d) => d.uuid !== row.uuid);
-    console.log('deleted');
     AppData.singleton.save();
   }
   public buildNew(): WorkoutSet {

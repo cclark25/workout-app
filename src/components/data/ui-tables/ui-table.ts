@@ -251,7 +251,6 @@ export abstract class UITable<
   public clearEditModes() {
     for (const row of this.data) {
       row[EditModeSymbol] = false;
-      console.log('Clearing edits');
     }
   }
 }

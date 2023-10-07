@@ -127,7 +127,6 @@ export default defineComponent({
     setupCharts() {
       this.$nextTick(() => {
         const graphRef = this.$refs['setGraph1'];
-        console.log('Setting up graphs: ', graphRef);
         if (graphRef as any) {
           const config: any = {
             type: 'line',

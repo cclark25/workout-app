@@ -1,5 +1,11 @@
 <template>
-  <q-dialog maximized v-if="expandable" :model-value="rowSelectedChange">
+  <q-dialog
+    maximized
+    v-if="expandable"
+    :model-value="showDialog"
+    @hide="dialogHidden()"
+    @show="dialogShown()"
+  >
     <div class="dialog">
       <div class="dialog-header">
         <q-tabs
@@ -20,7 +26,7 @@
           class="dialog-close-div"
           flat
           icon="close"
-          @click="dialogHidden()"
+          @click="showDialog = false"
         ></q-btn>
       </div>
 
@@ -70,7 +76,13 @@
         <div
           :ref="`row-${row[tableManager.tableKey]}`"
           style="display: table-row"
-          :class="`${displayedRowNumber++ % 2 ? 'odd' : 'even'}-row`"
+          :class="`div-table-row ${
+            displayedRowNumber++ % 2 ? 'odd' : 'even'
+          }-row ${
+            tableManager.isRecordInEditMode(row)
+              ? 'edit-mode-row'
+              : 'not-edited'
+          }`"
           @mousedown="
             mouseTouchStart(
               500,
@@ -126,15 +138,35 @@
   </div>
 
   <div class="ui-table-footer">
-    <slot name="footer-left"> </slot>
+    <div v-if="editModeRow === undefined">
+      <slot name="footer-left"> </slot>
+    </div>
+    <div v-else>
+      <q-btn
+        class="row-delete-button"
+        flat
+        :icon="deleteConfirmation ? 'check' : 'delete'"
+        @click="deleteRowButton()"
+        >{{ deleteConfirmation ? 'Are you sure?' : '' }}</q-btn
+      >
+    </div>
 
     <div>
       <q-btn
+        v-if="editModeRow === undefined"
         class="add-record-button"
         flat
         :disable="readonly"
         icon="add"
         @click="addRecord()"
+      ></q-btn>
+
+      <q-btn
+        v-else
+        class="row-close-button"
+        flat
+        icon="close"
+        @click="clearEdits()"
       ></q-btn>
     </div>
   </div>
@@ -175,11 +207,13 @@ export default defineComponent({
   data() {
     const data = {
       targetIndex: undefined as string | undefined,
-      rowSelectedChange: false,
+      showDialog: false,
       dialogCloseCallbacks: [] as (() => void)[],
       selectedRow: undefined as any,
+      editModeRow: undefined as any,
       dialogTabSelected: this.dialogTabs[0]?.key,
       mouseTouchStateSymbol: Symbol('MouseTouchStateSymbol'),
+      deleteConfirmation: false,
     };
 
     return data;
@@ -189,6 +223,15 @@ export default defineComponent({
   },
 
   methods: {
+    deleteRowButton() {
+      if (!this.deleteConfirmation) {
+        this.deleteConfirmation = true;
+        return;
+      }
+      this.tableManager.deleteRecord(this.editModeRow);
+      this.clearEdits();
+      this.deleteConfirmation = false;
+    },
     mouseTouchStart(
       timeout: number,
       row: any,
@@ -225,7 +268,6 @@ export default defineComponent({
     scrollToTarget() {
       if (this.targetIndex !== undefined) {
         const refEl = (this.$refs[`row-${this.targetIndex}`] as any)?.[0];
-        console.log('refEl: ', refEl);
 
         refEl?.scrollIntoView({
           block: 'end',
@@ -236,8 +278,8 @@ export default defineComponent({
           !this.$refs[this.targetIndex] ||
           !this.tableManager.isRecordInEditMode(
             (this.$refs[this.targetIndex] as any)?.props.row
-          ) ||
-          !this.tableManager.isEditable()
+          )
+          // ||          !this.tableManager.isEditable()
         ) {
           this.targetIndex = undefined;
         }
@@ -246,14 +288,21 @@ export default defineComponent({
     editRow(row: any) {
       this.tableManager.toggleRecordInEditMode(row);
       this.targetIndex = row[this.tableManager.tableKey];
+      this.editModeRow = row;
 
       this.$forceUpdate();
     },
+    dialogShown() {
+      this.clearEdits();
+    },
     dialogHidden() {
+      this.clearEdits();
+      this.showDialog = false;
+
       for (const callback of this.dialogCloseCallbacks) {
         callback();
       }
-      this.rowSelectedChange = false;
+
       if (this.selectedRow) {
         this.tableManager.onRecordDialogHide(this.selectedRow);
         this.deselectRow();
@@ -268,7 +317,7 @@ export default defineComponent({
     selectRow(row: any) {
       this.selectedRow = row;
       if (this.expandable) {
-        this.rowSelectedChange = true;
+        this.showDialog = true;
       }
       this.tableManager.rowSelected(row);
       this.rowSelected();
@@ -283,6 +332,8 @@ export default defineComponent({
 
     clearEdits() {
       this.tableManager.clearEditModes();
+      this.editModeRow = undefined;
+      this.deleteConfirmation = false;
     },
 
     addRecord() {

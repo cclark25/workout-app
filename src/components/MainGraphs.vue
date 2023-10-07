@@ -116,7 +116,6 @@ export default defineComponent({
   mounted() {
     this.setupCharts();
     RoutineNavigator.onSelectedChange(() => {
-      console.log('reloading graphs');
       this.setupCharts();
       this.$forceUpdate();
     });

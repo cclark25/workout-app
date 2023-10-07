@@ -13,7 +13,6 @@
   </q-drawer>
 
   <div class="main-page">
-    {{ console.log({ tabSelected }) }}
     <div class="navigation-bar">
       <div class="navigation-actions">
         <q-btn flat icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
@@ -108,7 +107,6 @@ export default defineComponent({
     RoutineNavigator.onSelectedChange((r) => {
       this.routineChanged++;
       this.$forceUpdate();
-      console.log('Routine changed');
     });
     const routineTableRef = this.$refs['routine-table'] as any;
     routineTableRef?.selectRow?.(RoutineNavigator.getSelectedRoutine());

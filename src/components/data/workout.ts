@@ -65,7 +65,6 @@ export class Workout {
       units: this.weightUnits,
     };
 
-    console.log('Getting target: ', target);
     return target;
   }
   public calculateOneRepMax() {

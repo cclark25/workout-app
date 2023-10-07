@@ -71,6 +71,5 @@ export class RoutineTable extends UITable<Routine> {
 
   public rowSelected(row: Routine): void {
     RoutineNavigator.setSelectedRoutine(row);
-    console.log('rowSelected called');
   }
 }

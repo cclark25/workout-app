@@ -108,7 +108,6 @@ export class WorkoutTable extends UITable<Workout> {
     AppData.singleton.save();
   }
   public deleteRecord(row: Workout): void {
-    console.log('Workout routine deleted');
     this.routine.workouts = this.routine.workouts.filter(
       (d) => d.uuid !== row.uuid
     );
