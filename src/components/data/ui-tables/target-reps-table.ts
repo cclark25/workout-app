@@ -3,6 +3,7 @@ import { EditModeSymbol, UIColumn, UITable } from './ui-table';
 import { Workout } from '../workout';
 
 export class TargetRepsTable extends UITable<{ num: number }> {
+  private repCounts = Array.from({ length: 30 }, (v, i) => ({ num: i + 1 }));
   public constructor(public workout: Workout) {
     super(
       [],
@@ -23,8 +24,11 @@ export class TargetRepsTable extends UITable<{ num: number }> {
             label: 'Required Lift Weight',
             format: (v: { value: number; units: string }) =>
               `${roundTo(v.value, 2)} ${v.units}`,
-            sort(a, b) {
-              return a - b;
+            sort(
+              a: { value: number; units: string },
+              b: { value: number; units: string }
+            ) {
+              return a.value - b.value;
             },
           },
           (row) => workout.getTargetRepWeight(row.num)
@@ -36,7 +40,7 @@ export class TargetRepsTable extends UITable<{ num: number }> {
   public getData(): ({ num: number } & {
     [EditModeSymbol]?: boolean | undefined;
   })[] {
-    return Array.from({ length: 30 }, (v, i) => ({ num: i + 1 }));
+    return this.repCounts;
   }
   public onRecordDialogHide(): void {
     return;

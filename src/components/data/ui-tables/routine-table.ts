@@ -16,7 +16,9 @@ export class RoutineTable extends UITable<Routine> {
         sortable: true,
       },
       (routine) => routine.getDisplayName(),
-      undefined,
+      (r, v) => {
+        r.name = v;
+      },
       'text'
     ),
     UIColumn.fromGetSet<Routine>(

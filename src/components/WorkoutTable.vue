@@ -6,7 +6,7 @@
     :tableManagerProp="table"
     :key="routine.uuid"
     ref="workoutTable"
-    :dialog-tabs="[
+    :dialogTabs="[
       { key: 'setData', label: 'Set Data' },
       { key: 'repMaxes', label: 'Target Rep Maxes' },
       { key: 'setGraphs', label: 'Graphs' },
@@ -14,7 +14,7 @@
   >
     <template v-slot:expand-section="props">
       <div-table
-        :tableManager="
+        :tableManagerProp="
           (currentWorkoutSetTable = new WorkoutSetTable(props.row))
         "
         ref="setsTable"
@@ -32,9 +32,9 @@
       </div-table>
 
       <div-table
-        readonly
         v-else-if="props.dialogTabSelected === 'repMaxes'"
-        :table-manager="new TargetRepsTable((props.row as Workout))"
+        readonly
+        :tableManagerProp=" (new TargetRepsTable((props.row as Workout)))"
       >
         <template v-slot:footer-left>
           <div class="elapsed-time" :key="timerTicks">
@@ -105,6 +105,7 @@ export default defineComponent({
       workoutInProgress: 0,
       table: new WorkoutTable(this.routine ?? new Routine('unnamed routine')),
       currentWorkoutSetTable: undefined as WorkoutSetTable | undefined,
+      curentTargetRepTable: undefined as TargetRepsTable | undefined,
       chart1: undefined as Chart<any, any, any> | undefined,
     };
   },

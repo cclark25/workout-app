@@ -152,6 +152,7 @@
 .div-table-body-cell,
 .div-table-header-cell {
   vertical-align: middle;
+  user-select: none;
 }
 
 .elapsed-time {

@@ -211,7 +211,7 @@ export default defineComponent({
       dialogCloseCallbacks: [] as (() => void)[],
       selectedRow: undefined as any,
       editModeRow: undefined as any,
-      dialogTabSelected: this.dialogTabs[0]?.key,
+      dialogTabSelected: this.dialogTabs[0]?.key as undefined | string,
       mouseTouchStateSymbol: Symbol('MouseTouchStateSymbol'),
       deleteConfirmation: false,
       tableManager: this.tableManagerProp,
@@ -317,6 +317,9 @@ export default defineComponent({
     },
 
     selectRow(row: unknown) {
+      if (this.tableManager.isRecordInEditMode(row)) {
+        return;
+      }
       this.selectedRow = row;
       if (this.expandable) {
         this.showDialog = true;
