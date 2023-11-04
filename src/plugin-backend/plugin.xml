@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="cordova-plugin-filemanager" version="0.2.3">
+    <name>Device</name>
+    <description>Cordova File Manager Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,file,file manager</keywords>
+    <js-module src="www/file.js" name="device">
+        <clobbers target="device" />
+    </js-module>
+
+
+    <platform name="android">
+        <config-file target="config.xml" parent="/*">
+            <feature name="FileManager">
+                <param name="android-package" value="org.apache.cordova.plugin.FileManager" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+        <source-file src="FileManager.java" target-dir="org/apache/cordova/plugin" />
+    </platform>
+</plugin>

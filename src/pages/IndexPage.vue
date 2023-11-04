@@ -149,15 +149,15 @@ export default defineComponent({
       console.log = (...msgs: any[]) => {
         this.debugMsg += `\n>${msgs.join(' ')}`;
       };
-      console.log(JSON.stringify(AppData.singleton.serialize()));
+      // console.log(JSON.stringify(AppData.singleton.serialize()));
 
-      // console.log(
-      //   'File manager result: ',
-      //   await (window as any).FileManager.createFile(
-      //     'filename.txt',
-      //     'file contents'
-      //   )
-      // );
+      console.log(
+        'File manager result: ',
+        await (window as any).FileManager.createFile(
+          'filename.txt',
+          'file contents'
+        )
+      );
       return;
 
       // console.log(
