@@ -45,7 +45,8 @@ export class RoutineSerializer implements Serializer<Routine, RoutineSerial> {
   }
   deserialize(source: RoutineSerial): Routine {
     const serializer = new WorkoutSerializer();
-    const newRoutine = new Routine(source.name);
+    const newRoutine = new Routine(source.name, source.uuid);
+
     newRoutine.workouts.push(
       ...source.workouts.map((w) => serializer.deserialize(w))
     );

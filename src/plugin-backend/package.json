@@ -1,0 +1,20 @@
+{
+  "name": "cordova-plugin-filemanager",
+  "version": "0.2.3",
+  "description": "Cordova File Manager Plugin",
+  "cordova": {
+    "id": "cordova-plugin-filemanager",
+    "platforms": [
+      "android"
+    ]
+  },
+  "keywords": [
+    "cordova",
+    "file",
+    "file manager",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "author": "",
+  "license": "Apache 2.0"
+}

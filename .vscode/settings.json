@@ -8,5 +8,12 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "vue.codeActions.enabled": false,
 
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "[java]": {
+    "editor.defaultFormatter": "mwpb.java-prettier-formatter"
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  },
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

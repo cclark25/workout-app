@@ -261,7 +261,7 @@ export default defineComponent({
       const timeoutObj = (row as any)[this.mouseTouchStateSymbol];
       const timedOut = !!timeoutObj?.['timedOut'];
       if (!timedOut) {
-        timeoutObj['onClick']?.();
+        timeoutObj?.['onClick']?.();
       }
       (row as any)[this.mouseTouchStateSymbol] = undefined;
     },
