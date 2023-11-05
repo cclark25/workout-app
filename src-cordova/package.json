@@ -15,6 +15,16 @@
   "cordova": {
     "platforms": [
       "android"
-    ]
+    ],
+    "plugins": {
+      "cordova-plugin-file": {
+        "ANDROIDX_WEBKIT_VERSION": "1.4.0"
+      },
+      "cordova-plugin-filemanager": {}
+    }
+  },
+  "devDependencies": {
+    "cordova-plugin-file": "^8.0.0",
+    "cordova-plugin-filemanager": "file:../src/plugin-backend"
   }
 }

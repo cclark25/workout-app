@@ -151,13 +151,17 @@ export default defineComponent({
       };
       // console.log(JSON.stringify(AppData.singleton.serialize()));
 
-      console.log(
-        'File manager result: ',
-        await (window as any).FileManager.createFile(
-          'filename.txt',
-          'file contents'
-        )
-      );
+      try {
+        console.log(
+          'File manager result: ',
+          await (window as any).FileManager.createFile(
+            `workout-data-${DateTime.now().toISO()}.json`,
+            JSON.stringify(AppData.singleton.serialize())
+          )
+        );
+      } catch (e) {
+        console.log('File manager error: ', e);
+      }
       return;
 
       // console.log(

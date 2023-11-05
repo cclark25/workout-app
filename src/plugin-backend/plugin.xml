@@ -16,6 +16,8 @@
                 <param name="android-package" value="org.apache.cordova.plugin.FileManager" />
                 <param name="onload" value="true" />
             </feature>
+            <uses-permission android:name="android.permission.FLAG_GRANT_READ_URI_PERMISSION"/>
+            <uses-permission android:name="android.permission.FLAG_GRANT_WRITE_URI_PERMISSION"/>
         </config-file>
         <source-file src="FileManager.java" target-dir="org/apache/cordova/plugin" />
     </platform>
