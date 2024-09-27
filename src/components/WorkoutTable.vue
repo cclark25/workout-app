@@ -9,7 +9,7 @@
     :dialogTabs="[
       { key: 'setData', label: 'Set Data' },
       { key: 'repMaxes', label: 'Target Rep Maxes' },
-      { key: 'setGraphs', label: 'Graphs' },
+      { key: 'notes', label: 'Notes' },
     ]"
   >
     <template v-slot:expand-section="props">
@@ -46,6 +46,10 @@
           </div>
         </template>
       </div-table>
+
+      <div v-else-if="props.dialogTabSelected === 'notes'">
+        <q-input v-model="(props.row as Workout).notes" :type="'text'" />
+      </div>
 
       <canvas
         ref="setGraph1"

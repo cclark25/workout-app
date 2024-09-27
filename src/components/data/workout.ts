@@ -17,6 +17,7 @@ export interface WorkoutSerial {
   sets: WorkoutSetSerial[];
   weightUnits: 'lbs';
   uuid?: string;
+  notes?: string;
 }
 
 export class Workout {
@@ -26,6 +27,8 @@ export class Workout {
     public readonly uuid: string = crypto.randomUUID(),
     public readonly parentRoutine?: Routine
   ) {}
+
+  public notes = '';
 
   public get averageReps() {
     return average(this.sets.map((s) => s.repCount));
@@ -88,6 +91,7 @@ export class WorkoutSerializer implements Serializer<Workout, WorkoutSerial> {
       uuid: source.uuid,
       weightUnits: source.weightUnits,
       sets: source.sets.map((s) => this.workoutSetSerializer.serialize(s)),
+      notes: source.notes,
     };
   }
   public deserialize(source: WorkoutSerial): Workout {
@@ -96,6 +100,7 @@ export class WorkoutSerializer implements Serializer<Workout, WorkoutSerial> {
       source.weightUnits,
       source.uuid
     );
+    newWorkout.notes = source.notes ?? '';
 
     return newWorkout;
   }
