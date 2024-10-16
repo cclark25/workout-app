@@ -79,7 +79,7 @@ export class WorkoutTable extends UITable<Workout> {
       },
       (row) =>
         row.sets
-          .map((w) => w.getEnergyEstimate())
+          .map((w) => w.getEnergyEstimate(this.routine))
           .reduce((p, c) => p + c.value, 0),
       undefined,
       'number'

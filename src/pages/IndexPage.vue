@@ -27,7 +27,8 @@
       >
         <q-tab key="data" label="Data" name="data" />
         <q-tab key="graphs" label="Graphs" name="graphs" />
-        <q-tab key="debug" label="Debug" name="debug"></q-tab>
+        <!-- <q-tab key="debug" label="Debug" name="debug"></q-tab> -->
+        <q-tab key="config" label="Config" name="config" />
       </q-tabs>
 
       <q-btn-dropdown flat label="File">
@@ -70,6 +71,16 @@
     <main-graphs v-else-if="tabSelected === 'graphs'"></main-graphs>
     <div v-else-if="tabSelected === 'debug'">
       <textarea v-text="debugMsg" style="width: 100%; height: 100vh"></textarea>
+    </div>
+    <div v-else-if="tabSelected === 'config'">
+      <label>Routine lift height in centimeters (defaults to 30 cm)</label>
+      <q-input
+        v-if="RoutineNavigator.selectedRoutine"
+        v-model="
+          RoutineNavigator.selectedRoutine!.configuration.liftHeightCentimeters
+        "
+        :type="'number'"
+      />
     </div>
   </div>
 </template>

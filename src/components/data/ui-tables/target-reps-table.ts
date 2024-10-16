@@ -3,7 +3,7 @@ import { EditModeSymbol, UIColumn, UITable } from './ui-table';
 import { Workout } from '../workout';
 
 export class TargetRepsTable extends UITable<{ num: number }> {
-  private repCounts = Array.from({ length: 30 }, (v, i) => ({ num: i + 1 }));
+  private repCounts = Array.from({ length: 300 }, (v, i) => ({ num: i + 1 }));
   public constructor(public workout: Workout) {
     super(
       [],

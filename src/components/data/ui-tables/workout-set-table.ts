@@ -3,7 +3,7 @@ import { WorkoutSet } from '../workout-set';
 import { DateTime } from 'luxon';
 import { Workout } from '../workout';
 import { AppData } from '../data-manager';
-import { roundTo } from 'src/lib/helper-functions';
+import { calculateOneRepMax, roundTo } from 'src/lib/helper-functions';
 
 export class WorkoutSetTable extends UITable<WorkoutSet> {
   public baseColumns: UIColumn<WorkoutSet>[] = [
@@ -54,6 +54,22 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
       false,
       'number'
     ),
+    UIColumn.fromGetSet<WorkoutSet>(
+      {
+        name: 'oneRepMax',
+        label: '1RM',
+        sortable: true,
+        format(v: ReturnType<typeof calculateOneRepMax>) {
+          return `${roundTo(v, 2)} ${'lbs'}`;
+        },
+        sort(a: number, b: number) {
+          return a - b;
+        },
+      },
+      (row) => calculateOneRepMax(row),
+      undefined,
+      'number'
+    ),
 
     UIColumn.fromGetSet<WorkoutSet>(
       {
@@ -69,7 +85,7 @@ export class WorkoutSetTable extends UITable<WorkoutSet> {
           return a.value - b.value;
         },
       },
-      (row) => row.getEnergyEstimate(),
+      (row) => row.getEnergyEstimate(this.workout.parentRoutine),
       undefined,
       'number'
     ),

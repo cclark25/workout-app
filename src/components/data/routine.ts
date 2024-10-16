@@ -7,8 +7,12 @@ export class Routine {
   public constructor(
     public name: string,
     public readonly uuid: string = crypto.randomUUID(),
-    public configuration: { weightUnits: 'lbs' } = {
+    public configuration: {
+      weightUnits: 'lbs';
+      liftHeightCentimeters: number;
+    } = {
       weightUnits: 'lbs',
+      liftHeightCentimeters: 30,
     }
   ) {}
 
@@ -33,6 +37,10 @@ export interface RoutineSerial {
   uuid?: string;
   workouts: WorkoutSerial[];
   name: string;
+  configuration?: {
+    weightUnits: 'lbs';
+    liftHeightCentimeters: number;
+  };
 }
 
 export class RoutineSerializer implements Serializer<Routine, RoutineSerial> {
@@ -45,10 +53,18 @@ export class RoutineSerializer implements Serializer<Routine, RoutineSerial> {
   }
   deserialize(source: RoutineSerial): Routine {
     const serializer = new WorkoutSerializer();
-    const newRoutine = new Routine(source.name, source.uuid);
+    const newRoutine = new Routine(
+      source.name,
+      source.uuid,
+      source.configuration
+    );
 
     newRoutine.workouts.push(
-      ...source.workouts.map((w) => serializer.deserialize(w))
+      ...source.workouts.map((w) => {
+        const workout = serializer.deserialize(w);
+        workout.parentRoutine = newRoutine;
+        return workout;
+      })
     );
 
     return newRoutine;

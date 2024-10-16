@@ -25,7 +25,7 @@ export class Workout {
     public sets: WorkoutSet[],
     public weightUnits = sets[0]?.weightUnits ?? 'lbs',
     public readonly uuid: string = crypto.randomUUID(),
-    public readonly parentRoutine?: Routine
+    public parentRoutine?: Routine
   ) {}
 
   public notes = '';
@@ -44,7 +44,10 @@ export class Workout {
 
   public get totalCalories() {
     return {
-      value: this.sets.reduce((p, c) => p + c.getEnergyEstimate().value, 0),
+      value: this.sets.reduce(
+        (p, c) => p + c.getEnergyEstimate(this.parentRoutine).value,
+        0
+      ),
       unit: 'lbs' as const,
     };
   }
@@ -59,12 +62,12 @@ export class Workout {
   }
 
   public getTargetRepWeight(repMaxesToDisplay: number) {
+    const ormSets = this.sets
+      .filter((s) => s.liftWeight > 0 && s.repCount > 0)
+      .map((s) => getWeightForRepGoal(repMaxesToDisplay, s));
+
     const target = {
-      value: average(
-        this.sets
-          .filter((s) => s.liftWeight > 0 && s.repCount > 0)
-          .map((s) => getWeightForRepGoal(repMaxesToDisplay, s))
-      ),
+      value: ormSets.reduce((p, c) => (c > p ? c : p), 0),
       units: this.weightUnits,
     };
 

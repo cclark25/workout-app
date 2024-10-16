@@ -51,7 +51,7 @@
         <q-input
           v-model="(props.row as Workout).notes"
           :type="'textarea'"
-          autogrow="true"
+          :autogrow="true"
           inputClass="notes-section"
         />
       </div>
@@ -148,7 +148,7 @@ export default defineComponent({
 
                   data:
                     this.currentWorkoutSetTable?.getData().map((d) => ({
-                      y: d.getEnergyEstimate().value,
+                      y: d.getEnergyEstimate(this.routine).value,
                       x: d.recordTimestamp,
                     })) ?? [],
                   backgroundColor: [
