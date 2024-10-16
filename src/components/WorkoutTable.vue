@@ -48,7 +48,12 @@
       </div-table>
 
       <div v-else-if="props.dialogTabSelected === 'notes'">
-        <q-input v-model="(props.row as Workout).notes" :type="'text'" />
+        <q-input
+          v-model="(props.row as Workout).notes"
+          :type="'textarea'"
+          autogrow="true"
+          inputClass="notes-section"
+        />
       </div>
 
       <canvas
